@@ -1,6 +1,8 @@
 package model;
 
 
+import android.graphics.Bitmap;
+
 public class Flower {
 
     private int flowerId;
@@ -9,10 +11,10 @@ public class Flower {
     private String instructions;
     private String price;
     private String category;
+    private Bitmap imgBitmap;
 
-
-
-    public Flower(){}
+    public Flower() {
+    }
 
     public void setFlowerId(int flowerId) {
         this.flowerId = flowerId;
@@ -62,8 +64,16 @@ public class Flower {
         return category;
     }
 
+    public Bitmap getImgBitmap() {
+        return imgBitmap;
+    }
+
+    public void setImgBitmap(Bitmap imgBitmap) {
+        this.imgBitmap = imgBitmap;
+    }
+
     @Override
     public String toString() {
-        return flowerId+" "+name+"\nPrice:"+price;
+        return flowerId + " " + name + "\nPrice:" + price;
     }
 }

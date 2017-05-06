@@ -1,5 +1,7 @@
 package com.example.waqar.webservices;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,15 +15,20 @@ import android.widget.TextView;
 import model.Flower;
 import Parser.JsonParser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import Adapter.FlowerAdapter;
 
 public class MainActivity extends AppCompatActivity {
     ProgressBar pb;
     Button btn;
     ListView listView;
-    ArrayAdapter<Flower> arrayAdapter;
-    String uri="http://services.hanselandpetal.com/feeds/flowers.json";
+    FlowerAdapter floweradapter;
+    String uri="http://services.hanselandpetal.com/secure/flowers.json";
+    String imgBase="http://services.hanselandpetal.com/photos/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,17 +59,33 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected List<Flower> doInBackground(String... params) {
-            String dataR=HttpManager.getData(params[0]);
-            return JsonParser.getData(dataR);
+            String dataR=HttpManager.getData(params[0],"feeduser","feedpassword");
+            List<Flower> flowers=new ArrayList<>();
+            flowers=JsonParser.getData(dataR);
+
+            String url;
+            for (Flower flower:flowers) {
+                try {
+                    url=imgBase+flower.getPhoto();
+                    InputStream is= (InputStream) new URL(url).getContent();
+                    Bitmap bitmap= BitmapFactory.decodeStream(is);
+                    flower.setImgBitmap(bitmap);
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+        return flowers;
         }
 
         @Override
         protected void onPostExecute(List<Flower> flowers) {
             super.onPostExecute(flowers);
             pb.setVisibility(View.INVISIBLE);
-            //Log.d("Token",flowers.get(1).toString());
-            arrayAdapter=new ArrayAdapter<Flower>(getBaseContext(),android.R.layout.simple_list_item_1,flowers);
-            listView.setAdapter(arrayAdapter);
+            floweradapter=new FlowerAdapter(MainActivity.this,flowers);
+            listView.setAdapter(floweradapter);
 
         }
 

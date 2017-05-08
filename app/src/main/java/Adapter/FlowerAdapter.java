@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,9 +32,14 @@ public class FlowerAdapter extends BaseAdapter {
 
     Context context;
     List<Flower> flowers;
+    LruCache<Integer,Bitmap> imagecache;
     public FlowerAdapter(Context context, List<Flower> flowers){
         this.context=context;
         this.flowers=flowers;
+
+        int maxMemory= (int) (Runtime.getRuntime().maxMemory()/1024);
+        int cacheSize=maxMemory/8;
+        imagecache=new LruCache<>(cacheSize);
     }
 
 
@@ -62,10 +69,14 @@ public class FlowerAdapter extends BaseAdapter {
         title.setText(flowers.get(position).getName());
         price.setText(flowers.get(position).getPrice());
 
-        if(flowers.get(position).getImgBitmap()!=null){
+        Bitmap bitmap=imagecache.get(flowers.get(position).getFlowerId());
+
+        if(bitmap !=null){
+            Log.d("waqar","CacheHit");
             ImageView iv= (ImageView) view.findViewById(R.id.fl_img);
             iv.setImageBitmap(flowers.get(position).getImgBitmap());
         }else{
+            Log.d("waqar","CacheMiss");
             FlowerAndView flowerAndView=new FlowerAndView();
             flowerAndView.flower= flowers.get(position);
             flowerAndView.view=view;
@@ -110,7 +121,8 @@ public class FlowerAdapter extends BaseAdapter {
             super.onPostExecute(result);
             ImageView iv= (ImageView) result.view.findViewById(R.id.fl_img);
             iv.setImageBitmap(result.bitmap);
-            result.flower.setImgBitmap(result.bitmap);
+            //result.flower.setImgBitmap(result.bitmap);
+            imagecache.put(result.flower.getFlowerId(),result.bitmap);
 
         }
     }

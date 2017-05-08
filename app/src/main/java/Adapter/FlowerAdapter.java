@@ -1,6 +1,9 @@
 package Adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +12,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.waqar.webservices.MainActivity;
 import com.example.waqar.webservices.R;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 import model.Flower;
@@ -52,12 +59,76 @@ public class FlowerAdapter extends BaseAdapter {
 
         TextView title= (TextView) view.findViewById(R.id.title);
         TextView price= (TextView) view.findViewById(R.id.price);
-        ImageView iv= (ImageView) view.findViewById(R.id.fl_img);
-
-        iv.setImageBitmap(flowers.get(position).getImgBitmap());
         title.setText(flowers.get(position).getName());
         price.setText(flowers.get(position).getPrice());
 
+        if(flowers.get(position).getImgBitmap()!=null){
+            ImageView iv= (ImageView) view.findViewById(R.id.fl_img);
+            iv.setImageBitmap(flowers.get(position).getImgBitmap());
+        }else{
+            FlowerAndView flowerAndView=new FlowerAndView();
+            flowerAndView.flower= flowers.get(position);
+            flowerAndView.view=view;
+            ImageLoader imageLoader=new ImageLoader();
+            imageLoader.execute(flowerAndView);
+        }
+
+
+
         return view;
     }
+
+    public class FlowerAndView{
+        Flower flower;
+        View view;
+        Bitmap bitmap;
+    }
+
+    public class ImageLoader extends AsyncTask<FlowerAndView,String,FlowerAndView>{
+
+        @Override
+        protected FlowerAndView doInBackground(FlowerAndView... params) {
+            FlowerAndView container=params[0];
+            Flower flower=container.flower;
+            String url;
+            try {
+                    url= MainActivity.imgBase+flower.getPhoto();
+                    InputStream is= (InputStream) new URL(url).getContent();
+                    Bitmap bitmap= BitmapFactory.decodeStream(is);
+                    flower.setImgBitmap(bitmap);
+                    is.close();
+                    container.bitmap=bitmap;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            return container;
+        }
+
+
+        @Override
+        protected void onPostExecute(FlowerAndView result) {
+            super.onPostExecute(result);
+            ImageView iv= (ImageView) result.view.findViewById(R.id.fl_img);
+            iv.setImageBitmap(result.bitmap);
+            result.flower.setImgBitmap(result.bitmap);
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

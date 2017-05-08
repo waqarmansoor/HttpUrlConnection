@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     FlowerAdapter floweradapter;
     String uri="http://services.hanselandpetal.com/secure/flowers.json";
-    String imgBase="http://services.hanselandpetal.com/photos/";
+    public static String imgBase="http://services.hanselandpetal.com/photos/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,18 +63,18 @@ public class MainActivity extends AppCompatActivity {
             List<Flower> flowers=new ArrayList<>();
             flowers=JsonParser.getData(dataR);
 
-            String url;
-            for (Flower flower:flowers) {
-                try {
-                    url=imgBase+flower.getPhoto();
-                    InputStream is= (InputStream) new URL(url).getContent();
-                    Bitmap bitmap= BitmapFactory.decodeStream(is);
-                    flower.setImgBitmap(bitmap);
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+//            String url;
+//            for (Flower flower:flowers) {
+//                try {
+//                    url=imgBase+flower.getPhoto();
+//                    InputStream is= (InputStream) new URL(url).getContent();
+//                    Bitmap bitmap= BitmapFactory.decodeStream(is);
+//                    flower.setImgBitmap(bitmap);
+//                    is.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
 
         return flowers;
